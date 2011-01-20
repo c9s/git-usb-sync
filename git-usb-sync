@@ -1,19 +1,23 @@
 #!/bin/bash
-basepath="gitrepos/"
+basepath="gitrepos"
 repo=$(basename `pwd`)
 
 if [[ $(uname) == "Linux" ]]  ; then
-    for vol in $(ls -1 /media/) ; do 
-        target_path="$vol" "/$basepath" "/$repo.git"
-        if [[ -d $target_path ]] ; then
-            git push $target_path
-        else
-            mkdir $target_path
-            git init --bare $target_path
-            git push $target_path
-        fi
-    done
+    mountbase=/media
 elif [[ $(uname) == "Darwin" ]] ; then
-
-
+    mountbase=/Volumns
 fi
+
+for vol in $(ls -1 $mountbase) ; do 
+    target_path="$mountbase/$vol/$basepath/$repo.git"
+    if [[ -d $target_path ]] ; then
+        echo Found $target_path
+        git pull $target_path && \
+            git push $target_path --all
+    else
+        mkdir -p $target_path
+        git init --bare $target_path
+        git push $target_path master
+        git push $target_path --all
+    fi
+done
