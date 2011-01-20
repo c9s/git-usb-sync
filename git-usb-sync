@@ -1,6 +1,7 @@
 #!/bin/bash
 basepath="gitrepos"
 repo=$(basename `pwd`)
+curbranch=$(cat .git/HEAD | cut -d: -f2 | perl -pe 's{\s*refs/heads/}{}' )
 
 if [[ $(uname) == "Linux" ]]  ; then
     mountbase=/media
@@ -12,8 +13,11 @@ for vol in $(ls -1 $mountbase) ; do
     target_path="$mountbase/$vol/$basepath/$repo.git"
     if [[ -d $target_path ]] ; then
         echo Found $target_path
-        git pull $target_path && \
-            git push $target_path --all
+        git fetch --all
+        git fetch $target_path &&
+            git pull --rebase $target_path $curbranch  && \
+            git push $target_path $curbranch
+        git push $target_path --all
     else
         mkdir -p $target_path
         git init --bare $target_path
