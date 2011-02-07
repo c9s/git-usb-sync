@@ -1,0 +1,49 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use File::Find::Rule;
+use File::Spec;
+use File::Basename;
+
+my @subcmds = shift || qw'pull push';
+
+my $local_repo_parent = $ENV{GIT_LOCAL_REPO_PATH} || File::Spec->join($ENV{HOME},'gitrepos');
+my $local_repo = File::Spec->join( $local_repo_parent ,  basename( $ENV{PWD} ) . '.git' );
+my $branch = qx(git branch | grep "^\\*" );
+$branch =~ s/[\s*]//;
+
+mkdir $local_repo_parent unless -d $local_repo_parent;
+
+unless(-d $local_repo) {
+    print STDERR "Local bare repository not found, creating one.\n";
+    print STDERR "Creating directory: $local_repo\n";
+    mkdir $local_repo;
+
+    print STDERR "Initializing bare repository.\n";
+    qx(git init --bare $local_repo);
+
+}
+
+# my @dirs = File::Find::Rule->directory->maxdepth( 1 )->in( $local_repo_parent );
+# use Data::Dumper; warn Dumper( \@dirs );
+unless( -d '.git' ) {
+    print STDERR ".git directory not found, initializing.\n";
+    qx(git init);
+    qx(touch .gitignore);
+    qx(git add .gitignore);
+    qx(git commit -a -m "First commit. add .gitignore file." );
+}
+
+unless( qx( git remote | grep local ) ) {
+    print STDERR "Remote local not found, creating one\n";
+    qx(git remote add local $local_repo);
+    qx(git push local master);
+}
+
+print STDERR "Pulling changes\n";
+qx(git pull --rebase local $branch);
+
+print STDERR "Pushing changes to repository.\n";
+qx(git push local --all );
+
+print STDERR "Done.\n";
