@@ -18,7 +18,7 @@ my $bare_repo = Git->repository( Repository => $local_bare_repo );
 $bare_repo->repo_path();
 
 my $branch = qx(git branch | grep "^\\*" );
-$branch =~ s/[\s*]//;
+$branch =~ s/[\s*]//g;
 
 mkdir $local_repo_parent unless -d $local_repo_parent;
 
