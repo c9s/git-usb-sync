@@ -52,12 +52,13 @@ if( $subcmd =~ /pull/ ) {
     if( $repo->command('diff') ) {
         die( 'Dirty' );
     }
+    my $target_branch = shift || $branch;
     $repo->command_noisy( 'fetch' , 'local' );
-    $repo->command_noisy( 'pull' , '--rebase' , 'local' , $branch );
+    $repo->command_noisy( 'pull' , '--rebase' , 'local' , $target_branch );
 }
 elsif( $subcmd =~ /push/ ) {
-    my $push_branch = shift || $branch;
-    $repo->command_noisy( 'push' , 'local' , $push_branch );
+    my $target_branch = shift || $branch;
+    $repo->command_noisy( 'push' , 'local' , $target_branch );
 }
 elsif( $subcmd =~ /sync/ ) {
     if( $repo->command('diff') ) {
