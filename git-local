@@ -4,11 +4,14 @@ use warnings;
 use File::Find::Rule;
 use File::Spec;
 use File::Basename;
+use Git;
 
-my @subcmds = shift || qw'pull push';
+my @subcmd = shift || 'sync';
+my $repo = Git->repository (Directory => $ENV{PWD} );
+my $wc_path = $repo->wc_path();
 
 my $local_repo_parent = $ENV{GIT_LOCAL_REPO_PATH} || File::Spec->join($ENV{HOME},'gitrepos');
-my $local_repo = File::Spec->join( $local_repo_parent ,  basename( $ENV{PWD} ) . '.git' );
+my $local_repo = File::Spec->join( $local_repo_parent ,  basename( $wc_path ) . '.git' );
 my $branch = qx(git branch | grep "^\\*" );
 $branch =~ s/[\s*]//;
 
