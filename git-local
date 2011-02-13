@@ -6,7 +6,8 @@ use File::Spec;
 use File::Basename;
 use Git;
 
-my @subcmd = shift || 'sync';
+my $subcmd = shift || 'sync';
+
 my $repo = Git->repository (Directory => $ENV{PWD} );
 my $wc_path = $repo->wc_path();
 
@@ -46,10 +47,19 @@ unless( qx( git remote | grep local ) ) {
     $repo->command('push' ,'local','master');
 }
 
-print STDERR "Pulling changes\n";
-qx(git pull --rebase local $branch);
 
-print STDERR "Pushing changes to repository.\n";
-qx(git push local --all );
+if( $subcmd =~ /pull/ ) {
+    $repo->command( 'fetch' , 'local' );
+    $repo->command( 'pull' , '--rebase' , 'local' , $branch );
+}
+elsif( $subcmd =~ /push/ ) {
+    my $push_branch = shift || $branch;
+    $repo->command( 'push' , 'local' , $push_branch );
+}
+elsif( $subcmd =~ /sync/ ) {
+    $repo->command( 'fetch' , 'local' );
+    $repo->command( 'pull' , '--rebase' , 'local' , $branch );
+    $repo->command( 'push' , 'local' , '--all' );
+}
 
 print STDERR "Done.\n";
