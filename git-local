@@ -14,6 +14,9 @@ my $local_repo_parent = $ENV{GIT_LOCAL_REPO_PATH} || File::Spec->join($ENV{HOME}
 my $local_bare_repo = File::Spec->join( $local_repo_parent ,  basename( $wc_path ) . '.git' );
 
 my $bare_repo = Git->repository( Repository => $local_bare_repo );
+$bare_repo->command( 'init' , '--bare' );
+
+
 
 
 
