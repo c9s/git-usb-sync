@@ -49,6 +49,9 @@ unless( qx( git remote | grep local ) ) {
 
 
 if( $subcmd =~ /pull/ ) {
+    if( $repo->command('diff') ) {
+        die( 'Dirty' );
+    }
     $repo->command_noisy( 'fetch' , 'local' );
     $repo->command_noisy( 'pull' , '--rebase' , 'local' , $branch );
 }
@@ -59,7 +62,6 @@ elsif( $subcmd =~ /push/ ) {
 elsif( $subcmd =~ /sync/ ) {
     if( $repo->command('diff') ) {
         die( 'Dirty' );
-
     }
     $repo->command_noisy( 'fetch' , 'local' );
     $repo->command_noisy( 'pull' , '--rebase' , 'local' , $branch );
