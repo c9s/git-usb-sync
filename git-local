@@ -49,17 +49,21 @@ unless( qx( git remote | grep local ) ) {
 
 
 if( $subcmd =~ /pull/ ) {
-    $repo->command( 'fetch' , 'local' );
-    $repo->command( 'pull' , '--rebase' , 'local' , $branch );
+    $repo->command_noisy( 'fetch' , 'local' );
+    $repo->command_noisy( 'pull' , '--rebase' , 'local' , $branch );
 }
 elsif( $subcmd =~ /push/ ) {
     my $push_branch = shift || $branch;
-    $repo->command( 'push' , 'local' , $push_branch );
+    $repo->command_noisy( 'push' , 'local' , $push_branch );
 }
 elsif( $subcmd =~ /sync/ ) {
-    $repo->command( 'fetch' , 'local' );
-    $repo->command( 'pull' , '--rebase' , 'local' , $branch );
-    $repo->command( 'push' , 'local' , '--all' );
+    if( $repo->command('diff') ) {
+        die( 'Dirty' );
+
+    }
+    $repo->command_noisy( 'fetch' , 'local' );
+    $repo->command_noisy( 'pull' , '--rebase' , 'local' , $branch );
+    $repo->command_noisy( 'push' , 'local' , '--all' );
 }
 
 print STDERR "Done.\n";
