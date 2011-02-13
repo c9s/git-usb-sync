@@ -14,26 +14,20 @@ my $local_repo_parent = $ENV{GIT_LOCAL_REPO_PATH} || File::Spec->join($ENV{HOME}
 my $local_bare_repo = File::Spec->join( $local_repo_parent ,  basename( $wc_path ) . '.git' );
 
 my $bare_repo = Git->repository( Repository => $local_bare_repo );
-$bare_repo->command( 'init' , '--bare' );
-
-
-
-
-
+$bare_repo->repo_path();
 
 my $branch = qx(git branch | grep "^\\*" );
 $branch =~ s/[\s*]//;
 
 mkdir $local_repo_parent unless -d $local_repo_parent;
 
-unless(-d $local_bare_repo) {
+unless(-d $local_bare_repo ) {
     print STDERR "Local bare repository not found, creating one.\n";
     print STDERR "Creating directory: $local_bare_repo\n";
     mkdir $local_bare_repo;
 
     print STDERR "Initializing bare repository.\n";
-    qx(git init --bare $local_bare_repo);
-
+    $bare_repo->command( 'init' , '--bare' );
 }
 
 # my @dirs = File::Find::Rule->directory->maxdepth( 1 )->in( $local_repo_parent );
@@ -48,8 +42,8 @@ unless( -d '.git' ) {
 
 unless( qx( git remote | grep local ) ) {
     print STDERR "Remote local not found, creating one\n";
-    qx(git remote add local $local_bare_repo);
-    qx(git push local master);
+    $repo->command('remote', 'add', $local_bare_repo );
+    $repo->command('push' ,'local','master');
 }
 
 print STDERR "Pulling changes\n";
